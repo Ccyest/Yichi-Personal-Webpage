@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Understanding the Raft Consensus Algorithm | Yichi Zhang</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="Introduction In the realm of distributed systems, achieving consensus among nodes is a fundamental challenge. The Raft consensus algorithm, developed by Diego Ongaro and John Ousterhout, has emerged as a popular choice for its simplicity, understandability, and strong consistency guarantees. In this blog post, we&rsquo;ll take a deep dive into the Raft algorithm, exploring its key components, working principles, and practical applications.
+Advantages of Raft Raft offers several advantages over other consensus algorithms:">
+    <meta name="generator" content="Hugo 0.127.0">
+    
+    
+    
+    
+      <meta name="robots" content="noindex, nofollow">
+    
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+  
+    <link rel="stylesheet" href="/css/custom.css">
+  
+
+    
+
+    
+      
+
+    
+
+    
+
+    
+      <link rel="canonical" href="http://localhost:1313/posts/raftprotocal/">
+    
+
+    <meta property="og:url" content="http://localhost:1313/posts/raftprotocal/">
+  <meta property="og:site_name" content="Yichi Zhang">
+  <meta property="og:title" content="Understanding the Raft Consensus Algorithm">
+  <meta property="og:description" content="Introduction In the realm of distributed systems, achieving consensus among nodes is a fundamental challenge. The Raft consensus algorithm, developed by Diego Ongaro and John Ousterhout, has emerged as a popular choice for its simplicity, understandability, and strong consistency guarantees. In this blog post, we’ll take a deep dive into the Raft algorithm, exploring its key components, working principles, and practical applications.
+Advantages of Raft Raft offers several advantages over other consensus algorithms:">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-06-26T00:00:00+00:00">
+    <meta property="article:modified_time" content="2024-06-26T00:00:00+00:00">
+
+  <meta itemprop="name" content="Understanding the Raft Consensus Algorithm">
+  <meta itemprop="description" content="Introduction In the realm of distributed systems, achieving consensus among nodes is a fundamental challenge. The Raft consensus algorithm, developed by Diego Ongaro and John Ousterhout, has emerged as a popular choice for its simplicity, understandability, and strong consistency guarantees. In this blog post, we’ll take a deep dive into the Raft algorithm, exploring its key components, working principles, and practical applications.
+Advantages of Raft Raft offers several advantages over other consensus algorithms:">
+  <meta itemprop="datePublished" content="2024-06-26T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2024-06-26T00:00:00+00:00">
+  <meta itemprop="wordCount" content="1477">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Understanding the Raft Consensus Algorithm">
+  <meta name="twitter:description" content="Introduction In the realm of distributed systems, achieving consensus among nodes is a fundamental challenge. The Raft consensus algorithm, developed by Diego Ongaro and John Ousterhout, has emerged as a popular choice for its simplicity, understandability, and strong consistency guarantees. In this blog post, we’ll take a deep dive into the Raft algorithm, exploring its key components, working principles, and practical applications.
+Advantages of Raft Raft offers several advantages over other consensus algorithms:">
+
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Yichi Zhang
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+      
+<div class="ananke-socials">
+  
+</div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked ttu">
+          
+        Posts
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">Understanding the Raft Consensus Algorithm</h1>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2024-06-26T00:00:00Z">June 26, 2024</time>
+      
+
+      
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-two-thirds-l"><h2 id="introduction">Introduction</h2>
+<p>In the realm of distributed systems, achieving consensus among nodes is a fundamental challenge. The Raft consensus algorithm, developed by Diego Ongaro and John Ousterhout, has emerged as a popular choice for its simplicity, understandability, and strong consistency guarantees. In this blog post, we&rsquo;ll take a deep dive into the Raft algorithm, exploring its key components, working principles, and practical applications.</p>
+<h2 id="advantages-of-raft">Advantages of Raft</h2>
+<p>Raft offers several advantages over other consensus algorithms:</p>
+<ol>
+<li>
+<p><strong>Simplicity</strong>: Raft is designed to be easy to understand and implement. Its clear separation of concerns and well-defined states make it more approachable compared to other consensus algorithms like Paxos.</p>
+</li>
+<li>
+<p><strong>Strong Consistency</strong>: Raft provides strong consistency guarantees, ensuring that all nodes in the cluster have the same view of the data. This is crucial for applications that require strict data integrity and consistency.</p>
+</li>
+<li>
+<p><strong>Fault Tolerance</strong>: Raft is designed to handle node failures and network partitions gracefully. It can continue to operate and maintain data consistency as long as a majority of nodes are available.</p>
+</li>
+</ol>
+<h2 id="understanding-raft">Understanding Raft</h2>
+<p>Raft is a consensus algorithm designed to manage replicated state machines in a distributed system. It aims to provide a reliable and efficient way for multiple nodes to agree on a shared state, even in the presence of failures or network partitions. Raft is based on the idea of electing a leader node that is responsible for managing the replication of the shared state to the other nodes, known as followers.</p>
+<p>Raft consists of three main components:</p>
+<ol>
+<li>
+<p><strong>Leader Election</strong>: In Raft, nodes are in one of three states: leader, candidate, or follower. Leader election is triggered when the current leader fails or when a follower times out waiting for communication from the leader. The candidate nodes compete for votes, and the node receiving the majority of votes becomes the new leader.</p>
+</li>
+<li>
+<p><strong>Log Replication</strong>: Once a leader is elected, it receives client requests and appends them to its log. The leader then replicates the log entries to the follower nodes to ensure that all nodes have the same sequence of commands. Raft uses a strong consistency model, requiring a majority of nodes to acknowledge the replication before committing the log entries.</p>
+</li>
+<li>
+<p><strong>Safety</strong>: Raft guarantees the safety property through the use of term numbers. Each term has a unique incrementing number, and a leader can only be elected in a new term. This mechanism prevents conflicting decisions from being made in different terms, ensuring that no two nodes can have different values for the same log entry.</p>
+</li>
+</ol>
+<h2 id="raft-in-action">Raft in Action</h2>
+<p>Raft has found wide adoption in various distributed systems and applications. Here are a few notable examples: <a href="https://github.com/coreos/etcd/tree/master/raft">etcd</a> and <a href="https://www.consul.io/docs/internals/consensus.html">consul</a>.</p>
+<ol>
+<li>
+<p><strong>etcd</strong>: etcd is a distributed key-value store that uses Raft as its consensus algorithm. It is commonly used for storing configuration data, service discovery, and distributed locking in containerized and cloud-native environments.</p>
+</li>
+<li>
+<p><strong>HashiCorp Consul</strong>: Consul is a distributed service mesh and key-value store that employs Raft for consensus. It provides features like service discovery, health checking, and configuration management for distributed systems.</p>
+</li>
+</ol>
+<h2 id="implementation">Implementation</h2>
+<p>The Skeleton Code is provided below:</p>
+<p>(From MIT <a href="https://github.com/nsiregar/mit-go/tree/master/src/raft">6.824 Distributed System public educational resources.</a>)</p>
+<p>I&rsquo;ll go through all functions in skeleton code one by one, and briefly talk about its functionality and how it works, but no actual code will be provided to prevent undesirable effects.</p>
+<p>For better understanding, I&rsquo;ll draw a brief diagram to illustrate my understanding of the inter-relationship between components in Raft protocol.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">rf</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Raft</span>) <span style="color:#a6e22e">GetState</span>() (<span style="color:#66d9ef">int</span>, <span style="color:#66d9ef">bool</span>) {}
+</span></span></code></pre></div><p>This function is a getter function that gets the term (returning an integer) and role (a boolean on if it is leader) of the current node.</p>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">rf</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Raft</span>) <span style="color:#a6e22e">persist</span>() {}
+</span></span></code></pre></div><p>To ensure durability and recover from crashes, the Raft state is persisted to stable storage. This function saves current state to persistent state, it enables the node to retrieve the information stored as persistent state after crashing and restarting. The current state includes: current term, voted for, and log entries.</p>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">rf</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Raft</span>) <span style="color:#a6e22e">readPersist</span>(<span style="color:#a6e22e">data</span> []<span style="color:#66d9ef">byte</span>) {}
+</span></span></code></pre></div><p>This function will read the saved persistent state stored by the persist function above. Restores the state from the persisted data during initialization.</p>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">RequestVoteArgs</span> <span style="color:#66d9ef">struct</span> {}<span style="color:#e6db74">`, `</span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">RequestVoteReply</span> <span style="color:#66d9ef">struct</span> {}
+</span></span></code></pre></div><p>RPC (Remote Procedure Call) is a protocol that allows a program to execute a procedure or function on another computer as if it were a local call.
+These two RPC are served as data carriers among nodes for the leader election process.
+Leader Election: The leader election process is implemented in the startElection function. When a node&rsquo;s election timeout expires, it transitions to the candidate state, increments its current term, and votes for itself. It then sends RequestVote RPCs to all other peers concurrently using goroutines.</p>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">rf</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Raft</span>) <span style="color:#a6e22e">RequestVote</span>(<span style="color:#a6e22e">args</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">RequestVoteArgs</span>, <span style="color:#a6e22e">reply</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">RequestVoteReply</span>) {}
+</span></span></code></pre></div><p>This RequestVote RPC handler, implemented in the RequestVote function, handles incoming vote requests. It checks the candidate&rsquo;s log against its own log to determine whether to grant the vote. If the candidate&rsquo;s log is up-to-date, the node grants the vote and resets its election timeout. Once the candidate decides to start an election, this function will be called concurrently to all peers to get votes from peers.</p>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">rf</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Raft</span>) <span style="color:#a6e22e">sendRequestVote</span>(<span style="color:#a6e22e">server</span> <span style="color:#66d9ef">int</span>, <span style="color:#a6e22e">args</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">RequestVoteArgs</span>, <span style="color:#a6e22e">reply</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">RequestVoteReply</span>) <span style="color:#66d9ef">bool</span> {}
+</span></span></code></pre></div><p>This is a function to call all peer nodes in a for loop and request votes.</p>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">rf</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Raft</span>) <span style="color:#a6e22e">Start</span>(<span style="color:#a6e22e">command</span> <span style="color:#66d9ef">interface</span>{}) (<span style="color:#66d9ef">int</span>, <span style="color:#66d9ef">int</span>, <span style="color:#66d9ef">bool</span>) {}
+</span></span></code></pre></div><p>Log Replication: Once a leader is elected, it begins log replication. When a client sends a command to the leader via the Start function, the leader appends the command to its log and sends AppendEntries RPCs to all followers to replicate the log entries.</p>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">AppendEntriesArgs</span> <span style="color:#66d9ef">struct</span> {}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">AppendEntriesReply</span> <span style="color:#66d9ef">struct</span> {}
+</span></span></code></pre></div><p>In general, AppendEntriesArgs and AppendEntriesReply structs in Raft are used for facilitating communication and synchronization in the Raft consensus algorithm. It helps with mechanisms including:</p>
+<ul>
+<li>Log replication: The leader sends new log entries to followers.</li>
+<li>Heartbeat mechanism: Empty AppendEntries calls act as heartbeats.</li>
+<li>Consistency checks: Verify log consistency between leader and followers.</li>
+<li>Commit index updates: Inform followers of the leader&rsquo;s commit progress.</li>
+<li>Term number synchronization: Ensure all nodes are on the same term.</li>
+</ul>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">rf</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Raft</span>) <span style="color:#a6e22e">AppendEntries</span>(<span style="color:#a6e22e">args</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">AppendEntriesArgs</span>, <span style="color:#a6e22e">reply</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">AppendEntriesReply</span>) {}
+</span></span></code></pre></div><p>The AppendEntries RPC handler, implemented in the AppendEntries function, handles incoming log entries from the leader. It checks for log consistency, appends the entries to its own log, and updates the commitIndex based on the leader&rsquo;s commitIndex.
+The leader uses nextIndex and matchIndex to keep track of the replication progress for each follower. It optimistically sends log entries to followers and retries with a reduced nextIndex if the follower&rsquo;s log is inconsistent.
+Committing Logs: Once a log entry has been replicated to a majority of servers, it can be committed. The updateCommitIndex function determines the highest log entry that has been replicated on a majority of servers and updates the commitIndex accordingly.</p>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">rf</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Raft</span>) <span style="color:#a6e22e">ticker</span>() {}
+</span></span></code></pre></div><p>Handling Timeouts and Heartbeats: The ticker function plays a crucial role in handling election timeouts and heartbeats. If a node is a leader, it periodically sends heartbeats (AppendEntries RPCs with empty entries) to maintain its authority and prevent new elections. If a follower&rsquo;s election timeout expires without receiving a heartbeat, it transitions to the candidate state and starts a new election.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>The Raft consensus algorithm has revolutionized the way distributed systems achieve consensus and maintain data consistency. Its simplicity, strong consistency guarantees, and fault tolerance have made it a go-to choice for building reliable distributed applications.</p>
+<p>For further exploration, I highly recommend reading the original Raft paper by Diego Ongaro and John Ousterhout, as well as exploring the various open-source projects and tools that have embraced Raft as their consensus algorithm.</p>
+<p>Remember, the journey of implementing Raft is not just about the destination, but also about the valuable lessons learned along the way. Embrace the challenges, learn from the community, and continue refining your implementation. Happy coding!</p>
+<h2 id="summary-of-tools">Summary of Tools</h2>
+<ul>
+<li>Debug Tools: <a href="https://blog.josejg.com/debugging-pretty/">https://blog.josejg.com/debugging-pretty/</a></li>
+<li>Visualization Tools: <a href="https://thesecretlivesofdata.com/raft/">https://thesecretlivesofdata.com/raft/</a></li>
+</ul>
+<h2 id="acknowledgement">Acknowledgement</h2>
+<p>This blog post reflects my personal experience and understanding of implementing the Raft Protocol. It is not affiliated with or endorsed by any institution and should not be used as an official educational reference. The content is based on my interpretation of various resources and may contain unintentional errors. It is not intended to infringe on any copyrights. If you find any similarities to other works or have concerns about the content, please contact me for immediate review and potential removal. Readers are encouraged to verify information from authoritative sources for critical applications.</p>
+<h2 id="reference">Reference</h2>
+<p>Special Thanks To:</p>
+<ul>
+<li>
+<p>CS 4740, Prof. Chang Lou, University of Virginia
+<a href="https://changlousys.github.io/CS4740/spring24/about/">https://changlousys.github.io/CS4740/spring24/about/</a>
+For developing and teaching cloud computing class, and indirectly lead to the creation of this blog.</p>
+</li>
+<li>
+<p>In Search of an Understandable Consensus Algorithm, Diego Ongaro and John Ousterhout, Stanford University
+<a href="https://web.stanford.edu/~ouster/cgi-bin/papers/raft-atc14">https://web.stanford.edu/~ouster/cgi-bin/papers/raft-atc14</a></p>
+</li>
+<li>
+<p>Raft Consensus Algorithm, Geek for geeks
+<a href="https://www.geeksforgeeks.org/raft-consensus-algorithm/">https://www.geeksforgeeks.org/raft-consensus-algorithm/</a></p>
+</li>
+<li>
+<p>Raft Algorithm, Wikipedia
+<a href="https://en.wikipedia.org/wiki/Raft_(algorithm)">https://en.wikipedia.org/wiki/Raft_(algorithm)</a></p>
+</li>
+<li>
+<p>Raft Introduction, Github Page
+<a href="https://raft.github.io/">https://raft.github.io/</a></p>
+</li>
+<li>
+<p>6.5840 Distributed Systems: Massachusetts Institute of Technology
+<a href="https://pdos.csail.mit.edu/6.824/">https://pdos.csail.mit.edu/6.824/</a></p>
+</li>
+</ul>
+<ul class="pa0">
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div>
+    </div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="http://localhost:1313/" >
+    &copy;  Yichi Zhang 2024 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div>
+</div>
+  </div>
+</footer>
+
+  </body>
+</html>

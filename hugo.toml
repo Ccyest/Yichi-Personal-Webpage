@@ -1,0 +1,6 @@
+baseURL = 'https://example.org/'
+languageCode = 'en-us'
+title = 'Yichi Zhang'
+theme = "ananke"
+[params]
+  custom_css = ["css/custom.css"]
