@@ -1,0 +1,17 @@
+
+  
+  .mw8 {
+    max-width: 60rem; /* Reduces right margin by making content narrower */
+  }
+
+  .f4 {
+    font-size: 1rem;
+    color: #000;
+}
+ .code{
+    color:green;
+}
+
+.w-two-thirds-l {
+    width: 86.66667%;
+}
