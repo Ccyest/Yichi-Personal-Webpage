@@ -154,13 +154,12 @@ Remember, the journey of implementing Raft is not just about the destination, bu
 
 This blog post reflects my personal experience and understanding of implementing the Raft Protocol. It is not affiliated with or endorsed by any institution and should not be used as an official educational reference. The content is based on my interpretation of various resources and may contain unintentional errors. It is not intended to infringe on any copyrights. If you find any similarities to other works or have concerns about the content, please contact me for immediate review and potential removal. Readers are encouraged to verify information from authoritative sources for critical applications.
 
+## Special Thanks
+CS 4740, Prof. Chang Lou, University of Virginia
+[https://changlousys.github.io/CS4740/spring24/about/](https://changlousys.github.io/CS4740/spring24/about/)
+For developing and teaching cloud computing class, and indirectly lead to the creation of this blog.
+
 ## Reference
-
-Special Thanks To:
-
-- CS 4740, Prof. Chang Lou, University of Virginia
-  [https://changlousys.github.io/CS4740/spring24/about/](https://changlousys.github.io/CS4740/spring24/about/)
-  For developing and teaching cloud computing class, and indirectly lead to the creation of this blog.
 
 - In Search of an Understandable Consensus Algorithm, Diego Ongaro and John Ousterhout, Stanford University
   [https://web.stanford.edu/~ouster/cgi-bin/papers/raft-atc14](https://web.stanford.edu/~ouster/cgi-bin/papers/raft-atc14)
